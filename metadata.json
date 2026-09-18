@@ -1,0 +1,6 @@
+{
+  "name": "SKILLGAP COMPASS",
+  "description": "College Skill Development, Career Roadmap, Course Learning, Credits, Certificates & Faculty Performance Platform",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
