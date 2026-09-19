@@ -61,6 +61,13 @@ export const CourseLibrary: React.FC<CourseLibraryProps> = ({
   // Active certificate modal
   const [viewingCertificate, setViewingCertificate] = useState<any>(null);
 
+  // Completion toast notification
+  const [completionToast, setCompletionToast] = useState<{
+    courseTitle: string;
+    credits: number;
+    certId: string;
+  } | null>(null);
+
   // Force re-render on progress changes
   const [storageVersion, setStorageVersion] = useState(0);
 
@@ -165,7 +172,8 @@ export const CourseLibrary: React.FC<CourseLibraryProps> = ({
 
     // Sync skills with student profile
     if (onUpdateProfileSkills) {
-      const updatedSkills = profile.skills.map((skill) => {
+      const currentSkills = profile?.skills || [];
+      const updatedSkills = currentSkills.map((skill) => {
         const isCovered = activeCourse.skills.some(
           (cs) => cs.toLowerCase() === skill.name.toLowerCase()
         );
@@ -187,6 +195,10 @@ export const CourseLibrary: React.FC<CourseLibraryProps> = ({
       credits: activeCourse.credits,
       certId: certificate.certificateId,
     });
+    notify?.achievement(
+      'Course Completed & Credited!',
+      `Earned +${activeCourse.credits} Credits for ${activeCourse.title}. Certificate ${certificate.certificateId} has been issued!`
+    );
     setActiveCourse(null);
   };
 
@@ -767,14 +779,43 @@ export const CourseLibrary: React.FC<CourseLibraryProps> = ({
                         Award on Completion: +{activeCourse.credits} Credits + Accredited Certificate
                       </span>
 
-                      <button
-                        id="submit-course-assessment-btn"
-                        onClick={handleCompleteAssessment}
-                        className="px-4 py-2 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-lg shadow-sm transition-colors flex items-center gap-1.5"
-                      >
-                        <Award className="w-4 h-4 text-amber-400" />
-                        Complete Course & Claim Certificate
-                      </button>
+                      {(() => {
+                        const prog = getCourseProgress(activeCourse.id);
+                        const isCompleted = prog?.status === 'Completed';
+                        if (isCompleted) {
+                          return (
+                            <div className="flex items-center gap-2">
+                              <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-800 bg-emerald-100 px-3 py-1.5 rounded-lg border border-emerald-200">
+                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                                Completed & Credited (+{activeCourse.credits} pts)
+                              </span>
+                              {onNavigateToCertificates && (
+                                <button
+                                  id="modal-view-certificate-btn"
+                                  onClick={() => {
+                                    setActiveCourse(null);
+                                    onNavigateToCertificates();
+                                  }}
+                                  className="px-3.5 py-1.5 text-xs font-bold text-slate-950 bg-amber-400 hover:bg-amber-300 rounded-lg shadow-xs transition-colors flex items-center gap-1.5"
+                                >
+                                  <Award className="w-3.5 h-3.5" />
+                                  View Certificate
+                                </button>
+                              )}
+                            </div>
+                          );
+                        }
+                        return (
+                          <button
+                            id="submit-course-assessment-btn"
+                            onClick={handleCompleteAssessment}
+                            className="px-4 py-2 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-lg shadow-sm transition-colors flex items-center gap-1.5"
+                          >
+                            <Award className="w-4 h-4 text-amber-400" />
+                            Complete Course & Claim Certificate
+                          </button>
+                        );
+                      })()}
                     </div>
                   </div>
                 </div>
