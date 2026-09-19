@@ -11,7 +11,7 @@ import { generateDeterministicRoadmap } from './src/services/roadmapGenerator.ts
 
 dotenv.config();
 
-const PORT = 3000;
+const PORT = Number(process.env.PORT) || 3000;
 
 function getGeminiClient() {
   const apiKey = process.env.GEMINI_API_KEY;
